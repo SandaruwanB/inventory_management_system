@@ -5,6 +5,8 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
@@ -142,10 +144,12 @@ public class Login extends JFrame {
 					System.out.println("Success");
 				}
 				else {
+					JOptionPane.showMessageDialog(this, "Incorrect Password");
 					System.out.println("Incorrect password");
 				}
 			}
 			else {
+				JOptionPane.showMessageDialog(this, "User Account not Found.");
 				System.out.println("User not found");
 			}
 		} catch (Exception e1) {

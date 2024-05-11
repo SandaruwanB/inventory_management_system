@@ -76,6 +76,7 @@ public class Login extends JFrame {
 		panelLeft.setBackground(new Color(0, 0, 102));
 		panelLeft.setBounds(0, 0, 218, 382);
 		contentPane.add(panelLeft);
+		panelLeft.setLayout(null);
 		
 		JLabel lblLogIn = new JLabel("LOG IN");
 		lblLogIn.setForeground(new Color(0, 0, 102));

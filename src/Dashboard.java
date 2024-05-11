@@ -15,6 +15,7 @@ import javaswingdev.drawer.EventDrawer;
 import java.awt.Color;
 import java.awt.Dialog.ModalExclusionType;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Toolkit;
 
 import javax.swing.ImageIcon;
@@ -42,19 +43,26 @@ public class Dashboard extends JFrame {
 	    
 	    setLocation(x,y);
 	    
+	    Image dashimg = new ImageIcon(getClass().getResource("/images/dashboard.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image usersimg = new ImageIcon(getClass().getResource("/images/group.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image productsimg = new ImageIcon(getClass().getResource("/images/cubes.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image stockoutimg = new ImageIcon(getClass().getResource("/images/up-arrow.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image stockinimg = new ImageIcon(getClass().getResource("/images/arrow-down.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image warehouseimg = new ImageIcon(getClass().getResource("/images/warehouse.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image logoutimg = new ImageIcon(getClass().getResource("/images/logout.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    
 		checkDatabseTables();
 		drawer = Drawer.newDrawer(this)
 				.header(new JLabel("Header Text"))
-				.addChild(new DrawerItem("Dashboard").icon(new ImageIcon(getClass().getResource("/images/house.svg"))).build())
-				.addChild(new DrawerItem("Customers").build())
-				.addChild(new DrawerItem("Supliers").build())
-				.addChild(new DrawerItem("Products").build())
-				.addChild(new DrawerItem("Stock In").build())
-				.addChild(new DrawerItem("Stock Out").build())
-				.addChild(new DrawerItem("Stock Locations").build())
-				.addChild(new DrawerItem("Users").build())
-				.addFooter(new DrawerItem("Log Out").build())
-				.background(new Color(0,0,102))
+				.addChild(new DrawerItem("Dashboard").icon(new ImageIcon(dashimg)).build())
+				.addChild(new DrawerItem("Customers").icon(new ImageIcon(usersimg)).build())
+				.addChild(new DrawerItem("Supliers").icon(new ImageIcon(usersimg)).build())
+				.addChild(new DrawerItem("Products").icon(new ImageIcon(productsimg)).build())
+				.addChild(new DrawerItem("Stock In").icon(new ImageIcon(stockinimg)).build())
+				.addChild(new DrawerItem("Stock Out").icon(new ImageIcon(stockoutimg)).build())
+				.addChild(new DrawerItem("Stock Locations").icon(new ImageIcon(warehouseimg)).build())
+				.addChild(new DrawerItem("Users").icon(new ImageIcon(usersimg)).build())
+				.addFooter(new DrawerItem("Log Out").icon(new ImageIcon(logoutimg)).build())
 				.duration(200)
 				.event(new EventDrawer() {
 

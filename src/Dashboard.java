@@ -22,13 +22,25 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JLayeredPane;
+import java.awt.Font;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
+import javax.swing.JScrollBar;
+import javax.swing.JTable;
+import java.awt.SystemColor;
+import javax.swing.table.DefaultTableModel;
 
 public class Dashboard extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
 	private DrawerController drawer;
+	private JLayeredPane layeredPane;
+	private JPanel dashboard, supliers, Customers, products, stockin, stockout, locations, users;
 	private DbConnection con = new DbConnection();
+	private JTable tableCustomers;
+	private DefaultTableModel model;
 
 
 	public Dashboard() {
@@ -50,6 +62,9 @@ public class Dashboard extends JFrame {
 	    Image stockinimg = new ImageIcon(getClass().getResource("/images/arrow-down.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
 	    Image warehouseimg = new ImageIcon(getClass().getResource("/images/warehouse.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
 	    Image logoutimg = new ImageIcon(getClass().getResource("/images/logout.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image menuimg = new ImageIcon(getClass().getResource("/images/menu.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image userimg = new ImageIcon(getClass().getResource("/images/user.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
+	    Image addimg = new ImageIcon(getClass().getResource("/images/plus.png")).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
 	    
 		checkDatabseTables();
 		drawer = Drawer.newDrawer(this)
@@ -70,28 +85,36 @@ public class Dashboard extends JFrame {
 					public void selected(int index, DrawerItem item) {
 						switch(index) {
 							case 0 :
-								System.out.println("Dashboard");
+								switchPages(dashboard);
+								openCloseDrawer();
 								break;
 							case 1 :
-								System.out.println("Customers");
+								switchPages(Customers);
+								openCloseDrawer();
 								break;
 							case 2 :
-								System.out.println("Supliers");
+								switchPages(supliers);
+								openCloseDrawer();
 								break;
 							case 3 :
-								System.out.println("Products");
+								switchPages(products);
+								openCloseDrawer();
 								break;
 							case 4 :
-								System.out.println("Stock In");
+								switchPages(stockin);
+								openCloseDrawer();
 								break;
 							case 5 :
-								System.out.println("Stock Out");
+								switchPages(stockout);
+								openCloseDrawer();
 								break;
 							case 6 :
-								System.out.println("Stock Locations");
+								switchPages(locations);
+								openCloseDrawer();
 								break;
 							case 7 :
-								System.out.println("Users");
+								switchPages(users);
+								openCloseDrawer();
 								break;
 							case 8 :
 								System.out.println("Log out");
@@ -107,19 +130,249 @@ public class Dashboard extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JButton button = new JButton("|||");
-		button.addActionListener(new ActionListener() {
+		JPanel panel = new JPanel();
+		panel.setBackground(new Color(255, 255, 255));
+		panel.setBounds(0, 0, 1024, 600);
+		contentPane.add(panel);
+		panel.setLayout(null);
+		
+		layeredPane = new JLayeredPane();
+		layeredPane.setBounds(0, 60, 1024, 540);
+		panel.add(layeredPane);
+		
+		dashboard = new JPanel();
+		layeredPane.setLayer(dashboard, 0);
+		dashboard.setBounds(0, 0, 1024, 567);
+		layeredPane.add(dashboard);
+		dashboard.setBackground(new Color(255, 255, 255));
+		dashboard.setLayout(null);
+		
+		JLabel lblDashboard = new JLabel("Dashboard");
+		lblDashboard.setBounds(34, 0, 126, 25);
+		dashboard.add(lblDashboard);
+		lblDashboard.setFont(new Font("Roboto", Font.BOLD, 19));
+		
+		JPanel totalProducts = new JPanel();
+		totalProducts.setBackground(new Color(0, 0, 102));
+		totalProducts.setBounds(34, 44, 215, 106);
+		dashboard.add(totalProducts);
+		totalProducts.setLayout(null);
+		
+		JLabel lblTotalProducts = new JLabel("Total Products");
+		lblTotalProducts.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTotalProducts.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblTotalProducts.setForeground(new Color(255, 255, 255));
+		lblTotalProducts.setBounds(0, 12, 215, 17);
+		totalProducts.add(lblTotalProducts);
+		
+		JLabel label = new JLabel("22");
+		label.setFont(new Font("Dialog", Font.BOLD, 24));
+		label.setHorizontalAlignment(SwingConstants.CENTER);
+		label.setForeground(new Color(255, 255, 255));
+		label.setBounds(79, 41, 60, 36);
+		totalProducts.add(label);
+		
+		JPanel totalLocations = new JPanel();
+		totalLocations.setLayout(null);
+		totalLocations.setBackground(new Color(0, 0, 102));
+		totalLocations.setBounds(285, 44, 215, 106);
+		dashboard.add(totalLocations);
+		
+		JLabel lblTotalLocations = new JLabel("Total Locations");
+		lblTotalLocations.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTotalLocations.setForeground(Color.WHITE);
+		lblTotalLocations.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblTotalLocations.setBounds(0, 12, 215, 17);
+		totalLocations.add(lblTotalLocations);
+		
+		JLabel label_1 = new JLabel("22");
+		label_1.setHorizontalAlignment(SwingConstants.CENTER);
+		label_1.setForeground(Color.WHITE);
+		label_1.setFont(new Font("Dialog", Font.BOLD, 24));
+		label_1.setBounds(79, 39, 60, 36);
+		totalLocations.add(label_1);
+		
+		JPanel totalStockOut = new JPanel();
+		totalStockOut.setLayout(null);
+		totalStockOut.setBackground(new Color(0, 0, 102));
+		totalStockOut.setBounds(531, 44, 215, 106);
+		dashboard.add(totalStockOut);
+		
+		JLabel lblTotalIssues = new JLabel("Total Stock Outs");
+		lblTotalIssues.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTotalIssues.setForeground(Color.WHITE);
+		lblTotalIssues.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblTotalIssues.setBounds(0, 12, 215, 17);
+		totalStockOut.add(lblTotalIssues);
+		
+		JLabel label_2 = new JLabel("22");
+		label_2.setHorizontalAlignment(SwingConstants.CENTER);
+		label_2.setForeground(Color.WHITE);
+		label_2.setFont(new Font("Dialog", Font.BOLD, 24));
+		label_2.setBounds(79, 41, 60, 36);
+		totalStockOut.add(label_2);
+		
+		JPanel totalLocations_1 = new JPanel();
+		totalLocations_1.setLayout(null);
+		totalLocations_1.setBackground(new Color(0, 0, 102));
+		totalLocations_1.setBounds(775, 44, 215, 106);
+		dashboard.add(totalLocations_1);
+		
+		JLabel lblTotalLocations_1 = new JLabel("Total Stock Ins");
+		lblTotalLocations_1.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTotalLocations_1.setForeground(Color.WHITE);
+		lblTotalLocations_1.setFont(new Font("Dialog", Font.BOLD, 15));
+		lblTotalLocations_1.setBounds(0, 12, 215, 17);
+		totalLocations_1.add(lblTotalLocations_1);
+		
+		JLabel label_1_1 = new JLabel("22");
+		label_1_1.setHorizontalAlignment(SwingConstants.CENTER);
+		label_1_1.setForeground(Color.WHITE);
+		label_1_1.setFont(new Font("Dialog", Font.BOLD, 24));
+		label_1_1.setBounds(79, 41, 60, 36);
+		totalLocations_1.add(label_1_1);
+		
+		Customers = new JPanel();
+		layeredPane.setLayer(Customers, 1);
+		Customers.setBounds(0, 0, 1024, 567);
+		layeredPane.add(Customers);
+		Customers.setLayout(null);
+		Customers.setBackground(Color.WHITE);
+		
+		JLabel lblCustomers = new JLabel("Customers");
+		lblCustomers.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblCustomers.setBounds(40, 0, 126, 25);
+		Customers.add(lblCustomers);
+		
+		Object[] column = {"Name", "City", "Email", "Contact", "Action"};
+		Object[] row = new Object[0];
+		
+		JButton btnAdd = new JButton("ADD");
+		btnAdd.setBackground(new Color(255, 255, 255));
+		btnAdd.setIcon(new ImageIcon(addimg));
+		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(drawer.isShow()) {
-					drawer.hide();
-				}
-				else {
-					drawer.show();
-				}
+				model.addRow(row);
 			}
 		});
-		button.setBounds(12, 30, 55, 27);
-		contentPane.add(button);
+		btnAdd.setBounds(883, 31, 105, 27);
+		Customers.add(btnAdd);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(26, 67, 966, 457);
+		Customers.add(scrollPane);
+		
+		tableCustomers = new JTable();
+		tableCustomers.setBackground(new Color(255, 255, 255));
+		tableCustomers.setForeground(new Color(0, 0, 0));
+		model = new DefaultTableModel();
+		model.setColumnIdentifiers(column);
+		tableCustomers.setModel(model);
+		scrollPane.setViewportView(tableCustomers);
+		
+
+		
+		supliers = new JPanel();
+		layeredPane.setLayer(supliers, 0);
+		supliers.setLayout(null);
+		supliers.setBackground(Color.WHITE);
+		supliers.setBounds(0, 0, 1024, 567);
+		layeredPane.add(supliers);
+		
+		JLabel lblSupliers = new JLabel("Supliers");
+		lblSupliers.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblSupliers.setBounds(40, 0, 126, 25);
+		supliers.add(lblSupliers);
+		
+		products = new JPanel();
+		layeredPane.setLayer(products, 0);
+		products.setLayout(null);
+		products.setBackground(Color.WHITE);
+		products.setBounds(0, 0, 1024, 567);
+		layeredPane.add(products);
+		
+		JLabel lblProducts = new JLabel("Products");
+		lblProducts.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblProducts.setBounds(40, 0, 126, 25);
+		products.add(lblProducts);
+		
+		stockin = new JPanel();
+		stockin.setLayout(null);
+		stockin.setBackground(Color.WHITE);
+		stockin.setBounds(0, 0, 1024, 567);
+		layeredPane.add(stockin);
+		
+		JLabel lblStockIn = new JLabel("Stock In");
+		lblStockIn.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblStockIn.setBounds(40, 0, 126, 25);
+		stockin.add(lblStockIn);
+		
+		stockout = new JPanel();
+		stockout.setBounds(0, 0, 1024, 567);
+		layeredPane.add(stockout);
+		stockout.setLayout(null);
+		stockout.setBackground(Color.WHITE);
+		
+		JLabel lblStockOut = new JLabel("Stock Out");
+		lblStockOut.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblStockOut.setBounds(40, 0, 126, 25);
+		stockout.add(lblStockOut);
+		
+		locations = new JPanel();
+		locations.setLayout(null);
+		locations.setBackground(Color.WHITE);
+		locations.setBounds(0, 0, 1024, 567);
+		layeredPane.add(locations);
+		
+		JLabel lblStockLocations = new JLabel("Stock Locations");
+		lblStockLocations.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblStockLocations.setBounds(40, 0, 126, 25);
+		locations.add(lblStockLocations);
+		
+		users = new JPanel();
+		users.setLayout(null);
+		users.setBackground(Color.WHITE);
+		users.setBounds(0, 0, 1024, 567);
+		layeredPane.add(users);
+		
+		JLabel lblUsers = new JLabel("Users");
+		lblUsers.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblUsers.setBounds(40, 0, 126, 25);
+		users.add(lblUsers);
+		
+		JButton btnMenue = new JButton();
+		btnMenue.setForeground(new Color(255, 255, 255));
+		btnMenue.setBounds(898, 12, 36, 27);
+		panel.add(btnMenue);
+		btnMenue.setBackground(new Color(255, 255, 255));
+		btnMenue.setIcon(new ImageIcon(menuimg));
+		
+		JButton btnProfile = new JButton();
+		btnProfile.setBounds(957, 12, 36, 27);
+		panel.add(btnProfile);
+		btnProfile.setBackground(new Color(255, 255, 255));
+		btnProfile.setIcon(new ImageIcon(userimg));
+		btnMenue.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				openCloseDrawer();
+			}
+		});
+	}
+	
+	public void switchPages(JPanel panel) {
+		this.layeredPane.removeAll();
+		this.layeredPane.add(panel);
+		this.layeredPane.repaint();
+		this.layeredPane.revalidate();
+	}
+	
+	public void openCloseDrawer() {
+		if (drawer.isShow()) {
+			drawer.hide();
+		}
+		else {
+			drawer.show();
+		}
 	}
 	
 	

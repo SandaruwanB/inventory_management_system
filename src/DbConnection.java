@@ -3,7 +3,7 @@ import java.sql.DriverManager;
 
 
 public class DbConnection {
-	private static final String DB_NAME = "ims";
+	public static final String DB_NAME = "ims";
 	private static final String DB_USER = "root";
 	private static final String DB_USER_PASSWORD = "Sanda@12";
 	private static final String URL  = "jdbc:mysql://localhost:3306/" + DB_NAME;

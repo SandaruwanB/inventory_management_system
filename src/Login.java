@@ -4,10 +4,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Color;
+import java.awt.Dimension;
+
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import java.awt.Font;
+import java.awt.Toolkit;
+
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.JTextField;
@@ -29,7 +33,6 @@ public class Login extends JFrame {
 	private JPanel contentPane;
 	private JTextField fieldUserName;
 	private JPasswordField passwordField;
-	private Dashboard dashboard = new Dashboard();
 	private DbConnection con = new DbConnection();
 
 	
@@ -37,7 +40,6 @@ public class Login extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					checkUserTable();
 					Login frame = new Login();
 					frame.setVisible(true);
 				} catch (Exception e) {
@@ -50,15 +52,23 @@ public class Login extends JFrame {
 
 	
 	public Login() {
+		checkUserTable();
 		setBackground(new Color(255, 255, 255));
 		setResizable(false);
 		setTitle("Stock Management System - Login");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 662, 382);
+		
+		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		int x = (screenSize.width - getWidth()) / 2;
+	    int y = (screenSize.height -getHeight()) / 2;
+	    
+	    setLocation(x,y);
+		
 		contentPane = new JPanel();
 		contentPane.setBackground(new Color(255, 255, 255));
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-
+		
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
@@ -140,6 +150,7 @@ public class Login extends JFrame {
 				String pass = rs.getString("password");
 				if (pass.equals(password)){
 					this.dispose();
+					Dashboard dashboard = new Dashboard();
 					dashboard.setVisible(true);
 					System.out.println("Success");
 				}
@@ -169,6 +180,8 @@ public class Login extends JFrame {
 					+ "password VARCHAR (255),"
 					+ "status BOOLEAN NOT NULL DEFAULT FALSE,"
 					+ "created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP);";
+			st.execute(query);
+			
 			String query2 = "SELECT * FROM users WHERE user_name='admin'";
 			pst = con.getConnection().prepareStatement(query2);
 			ResultSet rs = pst.executeQuery();

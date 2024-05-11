@@ -1,6 +1,9 @@
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -23,13 +26,17 @@ import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JLayeredPane;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
-import javax.swing.JScrollBar;
 import javax.swing.JTable;
-import java.awt.SystemColor;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JTextField;
+import javax.swing.border.BevelBorder;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Dashboard extends JFrame {
 
@@ -37,10 +44,21 @@ public class Dashboard extends JFrame {
 	private JPanel contentPane;
 	private DrawerController drawer;
 	private JLayeredPane layeredPane;
-	private JPanel dashboard, supliers, Customers, products, stockin, stockout, locations, users;
+	private JPanel dashboard, supliers, Customers, products, stockin, stockout, locations, users, CustomerAdd;
 	private DbConnection con = new DbConnection();
+	private Statement st;
 	private JTable tableCustomers;
-	private DefaultTableModel model;
+	private DefaultTableModel modelCustomer;
+	private JTextField textCustomerFirstName;
+	private JTextField textCustomerLastName;
+	private JTextField txtCustomerAddressLine1;
+	private JTextField textCustomerAddressLine2;
+	private JTextField textCustomerZip;
+	private JTextField textCustomerCity;
+	private JTextField textCustomerCountry;
+	private JTextField textCustomerEmail;
+	private JTextField textCustomerMobile;
+	private JTextField textCustomerOffice;
 
 
 	public Dashboard() {
@@ -65,6 +83,9 @@ public class Dashboard extends JFrame {
 	    Image menuimg = new ImageIcon(getClass().getResource("/images/menu.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
 	    Image userimg = new ImageIcon(getClass().getResource("/images/user.png")).getImage().getScaledInstance(25, 25, Image.SCALE_SMOOTH);
 	    Image addimg = new ImageIcon(getClass().getResource("/images/plus.png")).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+	    Image removeimg = new ImageIcon(getClass().getResource("/images/delete.png")).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+	    Image editimg = new ImageIcon(getClass().getResource("/images/edit.png")).getImage().getScaledInstance(18, 18, Image.SCALE_SMOOTH);
+	    
 	    
 		checkDatabseTables();
 		drawer = Drawer.newDrawer(this)
@@ -244,7 +265,7 @@ public class Dashboard extends JFrame {
 		lblCustomers.setBounds(40, 0, 126, 25);
 		Customers.add(lblCustomers);
 		
-		Object[] column = {"Name", "City", "Email", "Contact", "Action"};
+		Object[] column = {"id", "Name", "City", "Email", "Contact"};
 		Object[] row = new Object[0];
 		
 		JButton btnAdd = new JButton("ADD");
@@ -252,7 +273,7 @@ public class Dashboard extends JFrame {
 		btnAdd.setIcon(new ImageIcon(addimg));
 		btnAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				model.addRow(row);
+				switchPages(CustomerAdd);				
 			}
 		});
 		btnAdd.setBounds(883, 31, 105, 27);
@@ -263,12 +284,46 @@ public class Dashboard extends JFrame {
 		Customers.add(scrollPane);
 		
 		tableCustomers = new JTable();
+		tableCustomers.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				String id = (String) tableCustomers.getModel().getValueAt(tableCustomers.getSelectedRow(), 0);
+				
+				System.out.println(id);
+			}
+		});
 		tableCustomers.setBackground(new Color(255, 255, 255));
 		tableCustomers.setForeground(new Color(0, 0, 0));
-		model = new DefaultTableModel();
-		model.setColumnIdentifiers(column);
-		tableCustomers.setModel(model);
+		modelCustomer = new DefaultTableModel();
+		modelCustomer.setColumnIdentifiers(column);
+		writeCustomerDetails();
+		tableCustomers.setModel(modelCustomer);
 		scrollPane.setViewportView(tableCustomers);
+		
+		JButton btnDeleteCustomer = new JButton();
+		btnDeleteCustomer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (tableCustomers.getSelectedRow() != -1) {
+					String user_id = (String) tableCustomers.getModel().getValueAt(tableCustomers.getSelectedRow(), 0);
+					int id = Integer.parseInt(user_id);
+					
+					removeCustomer(id);
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Please click on customer you want to remove.");
+				}
+			}
+		});
+		btnDeleteCustomer.setIcon(new ImageIcon(removeimg));
+		btnDeleteCustomer.setBackground(new Color(255, 255, 255));
+		btnDeleteCustomer.setBounds(841, 31, 30, 27);
+		Customers.add(btnDeleteCustomer);
+		
+		JButton btnEditCustomer = new JButton("");
+		btnEditCustomer.setIcon(new ImageIcon(editimg));
+		btnEditCustomer.setBackground(new Color(255, 255, 255));
+		btnEditCustomer.setBounds(799, 31, 30, 27);
+		Customers.add(btnEditCustomer);
 		
 
 		
@@ -340,6 +395,140 @@ public class Dashboard extends JFrame {
 		lblUsers.setBounds(40, 0, 126, 25);
 		users.add(lblUsers);
 		
+		CustomerAdd = new JPanel();
+		layeredPane.setLayer(CustomerAdd, 0);
+		CustomerAdd.setLayout(null);
+		CustomerAdd.setBackground(Color.WHITE);
+		CustomerAdd.setBounds(0, 0, 1024, 567);
+		layeredPane.add(CustomerAdd);
+		
+		JLabel lblCustomersAdd = new JLabel("Customers / Add");
+		lblCustomersAdd.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblCustomersAdd.setBounds(40, 0, 198, 25);
+		CustomerAdd.add(lblCustomersAdd);
+		
+		JLabel lblFirstname = new JLabel("First Name");
+		lblFirstname.setBounds(40, 52, 81, 17);
+		CustomerAdd.add(lblFirstname);
+		
+		textCustomerFirstName = new JTextField();
+		textCustomerFirstName.setBounds(40, 70, 321, 21);
+		CustomerAdd.add(textCustomerFirstName);
+		textCustomerFirstName.setColumns(10);
+		
+		JLabel lblLastname = new JLabel("Last Name");
+		lblLastname.setBounds(40, 103, 81, 17);
+		CustomerAdd.add(lblLastname);
+		
+		textCustomerLastName = new JTextField();
+		textCustomerLastName.setBounds(40, 119, 321, 21);
+		CustomerAdd.add(textCustomerLastName);
+		textCustomerLastName.setColumns(10);
+		
+		JLabel lblAddress = new JLabel("Address");
+		lblAddress.setBounds(40, 165, 60, 17);
+		CustomerAdd.add(lblAddress);
+		
+		txtCustomerAddressLine1 = new JTextField();
+		txtCustomerAddressLine1.setToolTipText("Address Line 1");
+		txtCustomerAddressLine1.setBounds(40, 207, 321, 21);
+		CustomerAdd.add(txtCustomerAddressLine1);
+		txtCustomerAddressLine1.setColumns(10);
+		
+		JLabel lblAddressLine = new JLabel("Address Line 1");
+		lblAddressLine.setBounds(40, 191, 138, 17);
+		CustomerAdd.add(lblAddressLine);
+		
+		JLabel lblAddressLine_2 = new JLabel("Address Line 2");
+		lblAddressLine_2.setBounds(40, 240, 138, 17);
+		CustomerAdd.add(lblAddressLine_2);
+		
+		textCustomerAddressLine2 = new JTextField();
+		textCustomerAddressLine2.setBounds(40, 257, 321, 21);
+		CustomerAdd.add(textCustomerAddressLine2);
+		textCustomerAddressLine2.setColumns(10);
+		
+		JLabel lblAddressLine_2_1 = new JLabel("Zip Code");
+		lblAddressLine_2_1.setBounds(40, 290, 73, 17);
+		CustomerAdd.add(lblAddressLine_2_1);
+		
+		textCustomerZip = new JTextField();
+		textCustomerZip.setBounds(40, 308, 114, 21);
+		CustomerAdd.add(textCustomerZip);
+		textCustomerZip.setColumns(10);
+		
+		JLabel lblAddressLine_2_1_1 = new JLabel("City");
+		lblAddressLine_2_1_1.setBounds(181, 290, 73, 17);
+		CustomerAdd.add(lblAddressLine_2_1_1);
+		
+		textCustomerCity = new JTextField();
+		textCustomerCity.setBounds(181, 308, 180, 21);
+		CustomerAdd.add(textCustomerCity);
+		textCustomerCity.setColumns(10);
+		
+		JLabel lblNewLabel = new JLabel("Counrty");
+		lblNewLabel.setBounds(40, 341, 60, 17);
+		CustomerAdd.add(lblNewLabel);
+		
+		textCustomerCountry = new JTextField();
+		textCustomerCountry.setBounds(40, 358, 321, 21);
+		CustomerAdd.add(textCustomerCountry);
+		textCustomerCountry.setColumns(10);
+		
+		JPanel panel_1 = new JPanel();
+		panel_1.setBackground(new Color(0, 0, 102));
+		panel_1.setBounds(28, 159, 967, 4);
+		CustomerAdd.add(panel_1);
+		
+		JLabel lblEmailAddress = new JLabel("Email Address");
+		lblEmailAddress.setBounds(488, 52, 180, 17);
+		CustomerAdd.add(lblEmailAddress);
+		
+		textCustomerEmail = new JTextField();
+		textCustomerEmail.setBounds(488, 70, 347, 21);
+		CustomerAdd.add(textCustomerEmail);
+		textCustomerEmail.setColumns(10);
+		
+		JLabel lblMobile = new JLabel("Mobile");
+		lblMobile.setBounds(488, 103, 60, 17);
+		CustomerAdd.add(lblMobile);
+		
+		textCustomerMobile = new JTextField();
+		textCustomerMobile.setBounds(488, 119, 151, 21);
+		CustomerAdd.add(textCustomerMobile);
+		textCustomerMobile.setColumns(10);
+		
+		JLabel lblOffice = new JLabel("Office");
+		lblOffice.setBounds(671, 103, 60, 17);
+		CustomerAdd.add(lblOffice);
+		
+		textCustomerOffice = new JTextField();
+		textCustomerOffice.setBounds(671, 119, 164, 21);
+		CustomerAdd.add(textCustomerOffice);
+		textCustomerOffice.setColumns(10);
+		
+		JButton btnAddCustomer = new JButton("Add Customer");
+		btnAddCustomer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveCustomer();
+			}
+		});
+		btnAddCustomer.setForeground(new Color(255, 255, 255));
+		btnAddCustomer.setBackground(new Color(0, 204, 0));
+		btnAddCustomer.setBounds(40, 429, 143, 27);
+		CustomerAdd.add(btnAddCustomer);
+		
+		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchPages(Customers);
+			}
+		});
+		btnCancel.setForeground(new Color(255, 255, 255));
+		btnCancel.setBackground(new Color(255, 0, 0));
+		btnCancel.setBounds(217, 429, 105, 27);
+		CustomerAdd.add(btnCancel);
+		
 		JButton btnMenue = new JButton();
 		btnMenue.setForeground(new Color(255, 255, 255));
 		btnMenue.setBounds(898, 12, 36, 27);
@@ -359,6 +548,81 @@ public class Dashboard extends JFrame {
 		});
 	}
 	
+	
+	// customer works	
+	public void removeCustomer(int id) {
+
+		try {
+			String query = "DELETE FROM customers WHERE id="+id+"";
+			st.execute(query);
+			st.close();
+			writeCustomerDetails();
+			JOptionPane.showMessageDialog(null, "Successfully removed.");
+			
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
+		System.out.println(id);
+	}
+	
+	public void saveCustomer() {
+		try {
+			String query = "INSERT INTO `customers`(`first_name`,`last_name`,`address_line1`,`address_line2`,`zip`,`town`,`country`,`email`,`phone`,`office`) "
+					+ "VALUES ('"+this.textCustomerFirstName.getText()+"', '"+this.textCustomerLastName.getText()+"', '"+this.txtCustomerAddressLine1.getText()+"', '"+this.textCustomerAddressLine2.getText()+"', '"+this.textCustomerZip.getText()+"', '"+this.textCustomerCity.getText()+"', '"+this.textCustomerCountry.getText()+"', '"+this.textCustomerEmail.getText()+"', '"+this.textCustomerMobile.getText()+"', '"+this.textCustomerOffice.getText()+"');";
+			// empty fields
+			this.textCustomerFirstName.setText("");
+			this.textCustomerLastName.setText("");
+			this.txtCustomerAddressLine1.setText("");
+			this.textCustomerAddressLine2.setText("");
+			this.textCustomerZip.setText("");
+			this.textCustomerCity.setText("");
+			this.textCustomerCountry.setText("");
+			this.textCustomerEmail.setText("");
+			this.textCustomerMobile.setText("");
+			this.textCustomerOffice.setText("");
+			
+			st.execute(query);
+			st.close();
+			writeCustomerDetails();
+			JOptionPane.showMessageDialog(null, "Customer details created.");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeCustomerDetails() {		
+		try {
+			String query = "SELECT * FROM customers";
+			st = con.getConnection().createStatement();
+			ResultSet rs = st.executeQuery(query);
+			
+			this.modelCustomer.setRowCount(0);
+			while (rs.next()) {
+				String name = rs.getString("first_name") + " " + rs.getString("last_name");
+				String city = rs.getString("town");
+				String email = rs.getString("email");
+				String contact = rs.getString("phone");
+				String id = String.valueOf(rs.getInt("id"));
+				
+				String[] tblData = {id, name,city,email,contact};
+				
+				this.modelCustomer.addRow(tblData);
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	
+	// switch between pages
 	public void switchPages(JPanel panel) {
 		this.layeredPane.removeAll();
 		this.layeredPane.add(panel);
@@ -366,6 +630,8 @@ public class Dashboard extends JFrame {
 		this.layeredPane.revalidate();
 	}
 	
+	
+	// drawer opening and close
 	public void openCloseDrawer() {
 		if (drawer.isShow()) {
 			drawer.hide();
@@ -375,7 +641,7 @@ public class Dashboard extends JFrame {
 		}
 	}
 	
-	
+	// main table execution
 	public void checkDatabseTables(){
 		try {
 			Statement st = con.getConnection().createStatement();

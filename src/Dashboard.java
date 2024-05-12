@@ -44,11 +44,11 @@ public class Dashboard extends JFrame {
 	private JPanel contentPane;
 	private DrawerController drawer;
 	private JLayeredPane layeredPane;
-	private JPanel dashboard, supliers, Customers, products, stockin, stockout, locations, users, CustomerAdd, CustomerEdit, suplierAdd;
+	private JPanel dashboard, supliers, Customers, products, stockin, stockout, locations, users, CustomerAdd, CustomerEdit, suplierAdd, suplierEdit, StockLocationAdd;
 	private DbConnection con = new DbConnection();
 	private Statement st;
 	private JTable tableCustomers;
-	private DefaultTableModel modelCustomer, modelSuplier;
+	private DefaultTableModel modelCustomer, modelSuplier, modelStock;
 	private JTextField textCustomerFirstName;
 	private JTextField textCustomerLastName;
 	private JTextField txtCustomerAddressLine1;
@@ -80,6 +80,21 @@ public class Dashboard extends JFrame {
 	private JTextField textSuplierEmail;
 	private JTextField textSuplierPhone;
 	private JTextField textSuplierOffice;
+	private JTextField textSuplierEfirstname;
+	private JTextField textSuplierElastname;
+	private JTextField textSuplierEaddressline1;
+	private JTextField textSuplierEaddressline2;
+	private JTextField textSuplierEzip;
+	private JTextField textSuplierEcity;
+	private JTextField textSuplierEcountry;
+	private JTextField textSuplierEemail;
+	private JTextField textSuplierEmobile;
+	private JTextField textSuplierEoffice;
+	private JTable tableStockLocations;
+	private JTextField textLocationCode;
+	private JTextField textLocationName;
+	private JTextField textLocationEcode;
+	private JTextField textLocationEname;
 
 
 	public Dashboard() {
@@ -274,6 +289,15 @@ public class Dashboard extends JFrame {
 		label_1_1.setBounds(79, 41, 60, 36);
 		totalLocations_1.add(label_1_1);
 		
+		JLabel lblShortcuts = new JLabel("Shortcuts");
+		lblShortcuts.setBounds(34, 177, 60, 17);
+		dashboard.add(lblShortcuts);
+		
+		JPanel panel_2 = new JPanel();
+		panel_2.setBackground(new Color(0, 0, 51));
+		panel_2.setBounds(34, 166, 956, 6);
+		dashboard.add(panel_2);
+		
 		Customers = new JPanel();
 		layeredPane.setLayer(Customers, 0);
 		Customers.setBounds(0, 0, 1024, 567);
@@ -391,6 +415,15 @@ public class Dashboard extends JFrame {
 		JButton btnDeleteSuplier = new JButton();
 		btnDeleteSuplier.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if (tableSupliers.getSelectedRow() != -1) {
+					String user_id = (String) tableSupliers.getModel().getValueAt(tableSupliers.getSelectedRow(), 0);
+					int id = Integer.parseInt(user_id);
+					
+					removeSuplier(id);
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Please click on customer you want to remove.");
+				}
 			}
 		});
 		btnDeleteSuplier.setIcon(new ImageIcon(removeimg));
@@ -401,6 +434,15 @@ public class Dashboard extends JFrame {
 		JButton btnEditSuplier = new JButton("");
 		btnEditSuplier.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				if (tableSupliers.getSelectedRow() != -1) {
+					String user_id = (String) tableSupliers.getModel().getValueAt(tableSupliers.getSelectedRow(), 0);
+					int id = Integer.parseInt(user_id);
+					
+					editSuplier(id);
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Please click on suplier you want to update.");
+				}
 			}
 		});
 		btnEditSuplier.setIcon(new ImageIcon(editimg));
@@ -443,15 +485,61 @@ public class Dashboard extends JFrame {
 		stockout.add(lblStockOut);
 		
 		locations = new JPanel();
+		layeredPane.setLayer(locations, 0);
 		locations.setLayout(null);
 		locations.setBackground(Color.WHITE);
-		locations.setBounds(0, 0, 1024, 567);
+		locations.setBounds(0, 0, 1024, 540);
 		layeredPane.add(locations);
 		
 		JLabel lblStockLocations = new JLabel("Stock Locations");
 		lblStockLocations.setFont(new Font("Roboto", Font.BOLD, 19));
-		lblStockLocations.setBounds(40, 0, 126, 25);
+		lblStockLocations.setBounds(40, 0, 183, 25);
 		locations.add(lblStockLocations);
+		
+		JScrollPane scrollPane_2 = new JScrollPane();
+		scrollPane_2.setBounds(36, 71, 957, 443);
+		locations.add(scrollPane_2);
+		
+		tableStockLocations = new JTable();
+		Object[] stockColumns = {"id", "Location Code", "Location Name"}; 
+		scrollPane_2.setViewportView(tableStockLocations);
+		tableStockLocations.setBackground(new Color(255, 255, 255));
+		tableStockLocations.setForeground(new Color(0, 0, 0));
+		modelStock = new DefaultTableModel();
+		modelStock.setColumnIdentifiers(stockColumns);
+		writeStockLocationData();
+		tableStockLocations.setModel(modelStock);
+		
+		JButton btnAddStock = new JButton("ADD");
+		btnAddStock.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchPages(StockLocationAdd);
+			}
+		});
+		btnAddStock.setIcon(new ImageIcon(addimg));
+		btnAddStock.setBackground(Color.WHITE);
+		btnAddStock.setBounds(881, 35, 105, 27);
+		locations.add(btnAddStock);
+		
+		JButton btnEditStock = new JButton("");
+		btnEditStock.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnEditStock.setIcon(new ImageIcon(editimg));
+		btnEditStock.setBackground(Color.WHITE);
+		btnEditStock.setBounds(797, 35, 30, 27);
+		locations.add(btnEditStock);
+		
+		JButton btnDeleteStock = new JButton();
+		btnDeleteStock.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnDeleteStock.setIcon(new ImageIcon(removeimg));
+		btnDeleteStock.setBackground(Color.WHITE);
+		btnDeleteStock.setBounds(839, 35, 30, 27);
+		locations.add(btnDeleteStock);
 		
 		users = new JPanel();
 		users.setLayout(null);
@@ -736,7 +824,7 @@ public class Dashboard extends JFrame {
 		CustomerEdit.add(btnCancelEditCustomer);
 		
 		suplierAdd = new JPanel();
-		layeredPane.setLayer(suplierAdd, 1);
+		layeredPane.setLayer(suplierAdd, 0);
 		suplierAdd.setLayout(null);
 		suplierAdd.setBackground(Color.WHITE);
 		suplierAdd.setBounds(0, 0, 1024, 567);
@@ -869,6 +957,242 @@ public class Dashboard extends JFrame {
 		btnCancelSuplierAdd.setBounds(217, 429, 105, 27);
 		suplierAdd.add(btnCancelSuplierAdd);
 		
+		suplierEdit = new JPanel();
+		layeredPane.setLayer(suplierEdit, 0);
+		suplierEdit.setLayout(null);
+		suplierEdit.setBackground(Color.WHITE);
+		suplierEdit.setBounds(0, 0, 1024, 567);
+		layeredPane.add(suplierEdit);
+		
+		JLabel lblSupliersEdit = new JLabel("Supliers / Edit");
+		lblSupliersEdit.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblSupliersEdit.setBounds(40, 0, 198, 25);
+		suplierEdit.add(lblSupliersEdit);
+		
+		JLabel lblFirstname_2_1 = new JLabel("First Name");
+		lblFirstname_2_1.setBounds(40, 52, 81, 17);
+		suplierEdit.add(lblFirstname_2_1);
+		
+		textSuplierEfirstname = new JTextField();
+		textSuplierEfirstname.setColumns(10);
+		textSuplierEfirstname.setBounds(40, 70, 321, 21);
+		suplierEdit.add(textSuplierEfirstname);
+		
+		JLabel lblLastname_2_1 = new JLabel("Last Name");
+		lblLastname_2_1.setBounds(40, 103, 81, 17);
+		suplierEdit.add(lblLastname_2_1);
+		
+		textSuplierElastname = new JTextField();
+		textSuplierElastname.setColumns(10);
+		textSuplierElastname.setBounds(40, 119, 321, 21);
+		suplierEdit.add(textSuplierElastname);
+		
+		JLabel lblAddress_2_1 = new JLabel("Address");
+		lblAddress_2_1.setBounds(40, 165, 60, 17);
+		suplierEdit.add(lblAddress_2_1);
+		
+		textSuplierEaddressline1 = new JTextField();
+		textSuplierEaddressline1.setToolTipText("Address Line 1");
+		textSuplierEaddressline1.setColumns(10);
+		textSuplierEaddressline1.setBounds(40, 207, 321, 21);
+		suplierEdit.add(textSuplierEaddressline1);
+		
+		JLabel lblAddressLine_3_1 = new JLabel("Address Line 1");
+		lblAddressLine_3_1.setBounds(40, 191, 138, 17);
+		suplierEdit.add(lblAddressLine_3_1);
+		
+		JLabel lblAddressLine_2_3_1 = new JLabel("Address Line 2");
+		lblAddressLine_2_3_1.setBounds(40, 240, 138, 17);
+		suplierEdit.add(lblAddressLine_2_3_1);
+		
+		textSuplierEaddressline2 = new JTextField();
+		textSuplierEaddressline2.setColumns(10);
+		textSuplierEaddressline2.setBounds(40, 257, 321, 21);
+		suplierEdit.add(textSuplierEaddressline2);
+		
+		JLabel lblAddressLine_2_1_3_1 = new JLabel("Zip Code");
+		lblAddressLine_2_1_3_1.setBounds(40, 290, 73, 17);
+		suplierEdit.add(lblAddressLine_2_1_3_1);
+		
+		textSuplierEzip = new JTextField();
+		textSuplierEzip.setColumns(10);
+		textSuplierEzip.setBounds(40, 308, 114, 21);
+		suplierEdit.add(textSuplierEzip);
+		
+		JLabel lblAddressLine_2_1_1_2_1 = new JLabel("City");
+		lblAddressLine_2_1_1_2_1.setBounds(181, 290, 73, 17);
+		suplierEdit.add(lblAddressLine_2_1_1_2_1);
+		
+		textSuplierEcity = new JTextField();
+		textSuplierEcity.setColumns(10);
+		textSuplierEcity.setBounds(181, 308, 180, 21);
+		suplierEdit.add(textSuplierEcity);
+		
+		JLabel lblNewLabel_2_1 = new JLabel("Counrty");
+		lblNewLabel_2_1.setBounds(40, 341, 60, 17);
+		suplierEdit.add(lblNewLabel_2_1);
+		
+		textSuplierEcountry = new JTextField();
+		textSuplierEcountry.setColumns(10);
+		textSuplierEcountry.setBounds(40, 358, 321, 21);
+		suplierEdit.add(textSuplierEcountry);
+		
+		JPanel panel_1_2_1 = new JPanel();
+		panel_1_2_1.setBackground(new Color(0, 0, 102));
+		panel_1_2_1.setBounds(28, 159, 967, 4);
+		suplierEdit.add(panel_1_2_1);
+		
+		JLabel lblEmailAddress_2_1 = new JLabel("Email Address");
+		lblEmailAddress_2_1.setBounds(488, 52, 180, 17);
+		suplierEdit.add(lblEmailAddress_2_1);
+		
+		textSuplierEemail = new JTextField();
+		textSuplierEemail.setColumns(10);
+		textSuplierEemail.setBounds(488, 70, 347, 21);
+		suplierEdit.add(textSuplierEemail);
+		
+		JLabel lblMobile_2_1 = new JLabel("Mobile");
+		lblMobile_2_1.setBounds(488, 103, 60, 17);
+		suplierEdit.add(lblMobile_2_1);
+		
+		textSuplierEmobile = new JTextField();
+		textSuplierEmobile.setColumns(10);
+		textSuplierEmobile.setBounds(488, 119, 151, 21);
+		suplierEdit.add(textSuplierEmobile);
+		
+		JLabel lblOffice_2_1 = new JLabel("Office");
+		lblOffice_2_1.setBounds(671, 103, 60, 17);
+		suplierEdit.add(lblOffice_2_1);
+		
+		textSuplierEoffice = new JTextField();
+		textSuplierEoffice.setColumns(10);
+		textSuplierEoffice.setBounds(671, 119, 164, 21);
+		suplierEdit.add(textSuplierEoffice);
+		
+		JButton btnEditESuplier = new JButton("Update Suplier");
+		btnEditESuplier.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if (tableSupliers.getSelectedRow() != -1) {
+					String user_id = (String) tableSupliers.getModel().getValueAt(tableSupliers.getSelectedRow(), 0);
+					int id = Integer.parseInt(user_id);
+					updateSuplier(id);
+					
+				}
+				else {
+					JOptionPane.showMessageDialog(null, "Please click on customer you want to remove.");
+				}
+			}
+		});
+		btnEditESuplier.setForeground(Color.WHITE);
+		btnEditESuplier.setBackground(new Color(0, 204, 0));
+		btnEditESuplier.setBounds(40, 429, 143, 27);
+		suplierEdit.add(btnEditESuplier);
+		
+		JButton btnCancelSuplierEdit = new JButton("Cancel");
+		btnCancelSuplierEdit.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchPages(supliers);
+			}
+		});
+		btnCancelSuplierEdit.setForeground(Color.WHITE);
+		btnCancelSuplierEdit.setBackground(Color.RED);
+		btnCancelSuplierEdit.setBounds(217, 429, 105, 27);
+		suplierEdit.add(btnCancelSuplierEdit);
+		
+		StockLocationAdd = new JPanel();
+		layeredPane.setLayer(StockLocationAdd, 0);
+		StockLocationAdd.setLayout(null);
+		StockLocationAdd.setBackground(Color.WHITE);
+		StockLocationAdd.setBounds(0, 0, 1024, 567);
+		layeredPane.add(StockLocationAdd);
+		
+		JLabel lblStockLocations_1 = new JLabel("Stock Locations  / Add");
+		lblStockLocations_1.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblStockLocations_1.setBounds(40, 0, 198, 25);
+		StockLocationAdd.add(lblStockLocations_1);
+		
+		JLabel lblFirstname_3 = new JLabel("Location Code");
+		lblFirstname_3.setBounds(40, 52, 105, 17);
+		StockLocationAdd.add(lblFirstname_3);
+		
+		textLocationCode = new JTextField();
+		textLocationCode.setColumns(10);
+		textLocationCode.setBounds(40, 70, 321, 21);
+		StockLocationAdd.add(textLocationCode);
+		
+		JLabel lblLastname_3 = new JLabel("Location Name");
+		lblLastname_3.setBounds(40, 103, 105, 17);
+		StockLocationAdd.add(lblLastname_3);
+		
+		textLocationName = new JTextField();
+		textLocationName.setColumns(10);
+		textLocationName.setBounds(40, 119, 321, 21);
+		StockLocationAdd.add(textLocationName);
+		
+		JButton btnAddLocation = new JButton("Add Location");
+		btnAddLocation.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveLocation();
+			}
+		});
+		btnAddLocation.setForeground(Color.WHITE);
+		btnAddLocation.setBackground(new Color(0, 204, 0));
+		btnAddLocation.setBounds(40, 188, 143, 27);
+		StockLocationAdd.add(btnAddLocation);
+		
+		JButton btnCancelLocationAdd = new JButton("Cancel");
+		btnCancelLocationAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchPages(locations);
+			}
+		});
+		btnCancelLocationAdd.setForeground(Color.WHITE);
+		btnCancelLocationAdd.setBackground(Color.RED);
+		btnCancelLocationAdd.setBounds(195, 188, 105, 27);
+		StockLocationAdd.add(btnCancelLocationAdd);
+		
+		JPanel StockLocationEdit = new JPanel();
+		layeredPane.setLayer(StockLocationEdit, 1);
+		StockLocationEdit.setLayout(null);
+		StockLocationEdit.setBackground(Color.WHITE);
+		StockLocationEdit.setBounds(0, 0, 1024, 567);
+		layeredPane.add(StockLocationEdit);
+		
+		JLabel lblStockLocations_1_1 = new JLabel("Stock Locations  / Add");
+		lblStockLocations_1_1.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblStockLocations_1_1.setBounds(40, 0, 198, 25);
+		StockLocationEdit.add(lblStockLocations_1_1);
+		
+		JLabel lblFirstname_3_1 = new JLabel("Location Code");
+		lblFirstname_3_1.setBounds(40, 52, 105, 17);
+		StockLocationEdit.add(lblFirstname_3_1);
+		
+		textLocationEcode = new JTextField();
+		textLocationEcode.setColumns(10);
+		textLocationEcode.setBounds(40, 70, 321, 21);
+		StockLocationEdit.add(textLocationEcode);
+		
+		JLabel lblLastname_3_1 = new JLabel("Location Name");
+		lblLastname_3_1.setBounds(40, 103, 105, 17);
+		StockLocationEdit.add(lblLastname_3_1);
+		
+		textLocationEname = new JTextField();
+		textLocationEname.setColumns(10);
+		textLocationEname.setBounds(40, 119, 321, 21);
+		StockLocationEdit.add(textLocationEname);
+		
+		JButton btnUpdateLocation = new JButton("Update");
+		btnUpdateLocation.setForeground(Color.WHITE);
+		btnUpdateLocation.setBackground(new Color(0, 204, 0));
+		btnUpdateLocation.setBounds(40, 188, 143, 27);
+		StockLocationEdit.add(btnUpdateLocation);
+		
+		JButton btnCancelLocationEdit = new JButton("Cancel");
+		btnCancelLocationEdit.setForeground(Color.WHITE);
+		btnCancelLocationEdit.setBackground(Color.RED);
+		btnCancelLocationEdit.setBounds(195, 188, 105, 27);
+		StockLocationEdit.add(btnCancelLocationEdit);
+		
 		JButton btnMenue = new JButton();
 		btnMenue.setForeground(new Color(255, 255, 255));
 		btnMenue.setBounds(898, 12, 36, 27);
@@ -889,7 +1213,104 @@ public class Dashboard extends JFrame {
 	}
 	
 	
+	// stock locations works
+	public void saveLocation() {
+		try {
+			String query = "INSERT INTO `storage_locations`(`location_code`,`location_name`) "
+					+ "VALUES ('"+this.textLocationCode.getText()+"', '"+this.textLocationName.getText()+"');";
+			// empty fields
+			this.textLocationCode.setText("");
+			this.textLocationName.setText("");
+			
+			st.execute(query);
+			st.close();
+			writeStockLocationData();
+			JOptionPane.showMessageDialog(null, "Stock location created.");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeStockLocationData() {
+		try {
+			String query = "SELECT * FROM storage_locations";
+			st = con.getConnection().createStatement();
+			ResultSet rs = st.executeQuery(query);
+			
+			this.modelStock.setRowCount(0);
+			while (rs.next()) {
+				String location_code = rs.getString("location_code");
+				String location_name = rs.getString("location_name");
+				String id = String.valueOf(rs.getInt("location_id"));
+				
+				String[] tblData = {id, location_code, location_name};
+				
+				this.modelStock.addRow(tblData);
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	// supplier works
+ 	public void updateSuplier(int id) {
+		try {
+			String query = "UPDATE `supliers` SET `first_name`='"+this.textSuplierEfirstname.getText()+"', `last_name`='"+this.textSuplierElastname.getText()+"',`address_line1`='"+this.textSuplierEaddressline1.getText()+"',`address_line2`='"+this.textSuplierEaddressline2.getText()+"',`zip` = "+this.textSuplierEzip.getText()+",`town`='"+this.textSuplierEcity.getText()+"',`country`='"+this.textSuplierEcountry.getText()+"',`email`='"+this.textSuplierEemail.getText()+"',`phone`='"+this.textSuplierEmobile.getText()+"',`office`='"+this.textSuplierEoffice.getText()+"' WHERE `customers`.`id` = "+id+";"; 
+			st.execute(query);
+			writeSuplierDetails();
+			JOptionPane.showMessageDialog(null, "Supplier details updated.");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void editSuplier(int id) {
+		try {
+			
+			String query = "SELECT * FROM supliers WHERE id="+id+"";
+			st = con.getConnection().createStatement();
+			
+			ResultSet rs = st.executeQuery(query);
+			
+			if (rs.next()) {
+				this.textSuplierEfirstname.setText(rs.getString("first_name"));
+				this.textSuplierElastname.setText(rs.getString("last_name"));
+				this.textSuplierEaddressline1.setText(rs.getString("address_line1"));
+				this.textSuplierEaddressline2.setText(rs.getString("address_line2"));
+				this.textSuplierEzip.setText(String.valueOf(rs.getInt("zip")));
+				this.textSuplierEcity.setText(rs.getString("town"));
+				this.textSuplierEcountry.setText(rs.getString("country"));
+				this.textSuplierEemail.setText(rs.getString("email"));
+				this.textSuplierEmobile.setText(rs.getString("phone"));
+				this.textSuplierEoffice.setText(rs.getString("office"));
+				switchPages(suplierEdit);
+				
+			}
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void removeSuplier(int id) {
+		try {
+			String query = "DELETE FROM supliers WHERE id="+id+"";
+			st.execute(query);
+			st.close();
+			writeSuplierDetails();
+			JOptionPane.showMessageDialog(null, "Successfully removed.");
+			
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+	
 	public void saveSuplier() {
 		try {
 			String query = "INSERT INTO `supliers`(`first_name`,`last_name`,`address_line1`,`address_line2`,`zip`,`town`,`country`,`email`,`phone`,`office`) "

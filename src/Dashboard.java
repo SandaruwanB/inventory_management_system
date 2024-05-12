@@ -44,11 +44,11 @@ public class Dashboard extends JFrame {
 	private JPanel contentPane;
 	private DrawerController drawer;
 	private JLayeredPane layeredPane;
-	private JPanel dashboard, supliers, Customers, products, stockin, stockout, locations, users, CustomerAdd, CustomerEdit;
+	private JPanel dashboard, supliers, Customers, products, stockin, stockout, locations, users, CustomerAdd, CustomerEdit, suplierAdd;
 	private DbConnection con = new DbConnection();
 	private Statement st;
 	private JTable tableCustomers;
-	private DefaultTableModel modelCustomer;
+	private DefaultTableModel modelCustomer, modelSuplier;
 	private JTextField textCustomerFirstName;
 	private JTextField textCustomerLastName;
 	private JTextField txtCustomerAddressLine1;
@@ -69,6 +69,17 @@ public class Dashboard extends JFrame {
 	private JTextField textCustomerEemail;
 	private JTextField textCustomerEmobile;
 	private JTextField textCustomerEofficel;
+	private JTable tableSupliers;
+	private JTextField textSuplierFirstname;
+	private JTextField textSuplierLastname;
+	private JTextField textSuplierAddressline1;
+	private JTextField textSuplierAddressline2;
+	private JTextField textSuplierZip;
+	private JTextField textSuplierCity;
+	private JTextField textSuplierCountry;
+	private JTextField textSuplierEmail;
+	private JTextField textSuplierPhone;
+	private JTextField textSuplierOffice;
 
 
 	public Dashboard() {
@@ -276,7 +287,6 @@ public class Dashboard extends JFrame {
 		Customers.add(lblCustomers);
 		
 		Object[] column = {"id", "Name", "City", "Email", "Contact"};
-		Object[] row = new Object[0];
 		
 		JButton btnAdd = new JButton("ADD");
 		btnAdd.setBackground(new Color(255, 255, 255));
@@ -353,6 +363,50 @@ public class Dashboard extends JFrame {
 		lblSupliers.setFont(new Font("Roboto", Font.BOLD, 19));
 		lblSupliers.setBounds(40, 0, 126, 25);
 		supliers.add(lblSupliers);
+		
+		JButton btnSuplierAdd = new JButton("ADD");
+		btnSuplierAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchPages(suplierAdd);
+			}
+		});
+		btnSuplierAdd.setIcon(new ImageIcon(addimg));
+		btnSuplierAdd.setBackground(Color.WHITE);
+		btnSuplierAdd.setBounds(884, 33, 105, 27);
+		supliers.add(btnSuplierAdd);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		scrollPane_1.setBounds(29, 68, 967, 456);
+		supliers.add(scrollPane_1);
+		
+		tableSupliers = new JTable();
+		tableSupliers.setBackground(new Color(255, 255, 255));
+		tableSupliers.setForeground(new Color(0, 0, 0));
+		modelSuplier = new DefaultTableModel();
+		modelSuplier.setColumnIdentifiers(column);
+		writeSuplierDetails();
+		tableSupliers.setModel(modelSuplier);
+		scrollPane_1.setViewportView(tableSupliers);
+		
+		JButton btnDeleteSuplier = new JButton();
+		btnDeleteSuplier.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnDeleteSuplier.setIcon(new ImageIcon(removeimg));
+		btnDeleteSuplier.setBackground(Color.WHITE);
+		btnDeleteSuplier.setBounds(842, 33, 30, 27);
+		supliers.add(btnDeleteSuplier);
+		
+		JButton btnEditSuplier = new JButton("");
+		btnEditSuplier.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnEditSuplier.setIcon(new ImageIcon(editimg));
+		btnEditSuplier.setBackground(Color.WHITE);
+		btnEditSuplier.setBounds(800, 33, 30, 27);
+		supliers.add(btnEditSuplier);
 		
 		products = new JPanel();
 		layeredPane.setLayer(products, 0);
@@ -545,7 +599,7 @@ public class Dashboard extends JFrame {
 		CustomerAdd.add(btnCancel);
 		
 		CustomerEdit = new JPanel();
-		layeredPane.setLayer(CustomerEdit, 1);
+		layeredPane.setLayer(CustomerEdit, 0);
 		CustomerEdit.setLayout(null);
 		CustomerEdit.setBackground(Color.WHITE);
 		CustomerEdit.setBounds(0, 0, 1024, 567);
@@ -681,6 +735,140 @@ public class Dashboard extends JFrame {
 		btnCancelEditCustomer.setBounds(147, 429, 105, 27);
 		CustomerEdit.add(btnCancelEditCustomer);
 		
+		suplierAdd = new JPanel();
+		layeredPane.setLayer(suplierAdd, 1);
+		suplierAdd.setLayout(null);
+		suplierAdd.setBackground(Color.WHITE);
+		suplierAdd.setBounds(0, 0, 1024, 567);
+		layeredPane.add(suplierAdd);
+		
+		JLabel lblSupliersAdd = new JLabel("Supliers / Add");
+		lblSupliersAdd.setFont(new Font("Roboto", Font.BOLD, 19));
+		lblSupliersAdd.setBounds(40, 0, 198, 25);
+		suplierAdd.add(lblSupliersAdd);
+		
+		JLabel lblFirstname_2 = new JLabel("First Name");
+		lblFirstname_2.setBounds(40, 52, 81, 17);
+		suplierAdd.add(lblFirstname_2);
+		
+		textSuplierFirstname = new JTextField();
+		textSuplierFirstname.setColumns(10);
+		textSuplierFirstname.setBounds(40, 70, 321, 21);
+		suplierAdd.add(textSuplierFirstname);
+		
+		JLabel lblLastname_2 = new JLabel("Last Name");
+		lblLastname_2.setBounds(40, 103, 81, 17);
+		suplierAdd.add(lblLastname_2);
+		
+		textSuplierLastname = new JTextField();
+		textSuplierLastname.setColumns(10);
+		textSuplierLastname.setBounds(40, 119, 321, 21);
+		suplierAdd.add(textSuplierLastname);
+		
+		JLabel lblAddress_2 = new JLabel("Address");
+		lblAddress_2.setBounds(40, 165, 60, 17);
+		suplierAdd.add(lblAddress_2);
+		
+		textSuplierAddressline1 = new JTextField();
+		textSuplierAddressline1.setToolTipText("Address Line 1");
+		textSuplierAddressline1.setColumns(10);
+		textSuplierAddressline1.setBounds(40, 207, 321, 21);
+		suplierAdd.add(textSuplierAddressline1);
+		
+		JLabel lblAddressLine_3 = new JLabel("Address Line 1");
+		lblAddressLine_3.setBounds(40, 191, 138, 17);
+		suplierAdd.add(lblAddressLine_3);
+		
+		JLabel lblAddressLine_2_3 = new JLabel("Address Line 2");
+		lblAddressLine_2_3.setBounds(40, 240, 138, 17);
+		suplierAdd.add(lblAddressLine_2_3);
+		
+		textSuplierAddressline2 = new JTextField();
+		textSuplierAddressline2.setColumns(10);
+		textSuplierAddressline2.setBounds(40, 257, 321, 21);
+		suplierAdd.add(textSuplierAddressline2);
+		
+		JLabel lblAddressLine_2_1_3 = new JLabel("Zip Code");
+		lblAddressLine_2_1_3.setBounds(40, 290, 73, 17);
+		suplierAdd.add(lblAddressLine_2_1_3);
+		
+		textSuplierZip = new JTextField();
+		textSuplierZip.setColumns(10);
+		textSuplierZip.setBounds(40, 308, 114, 21);
+		suplierAdd.add(textSuplierZip);
+		
+		JLabel lblAddressLine_2_1_1_2 = new JLabel("City");
+		lblAddressLine_2_1_1_2.setBounds(181, 290, 73, 17);
+		suplierAdd.add(lblAddressLine_2_1_1_2);
+		
+		textSuplierCity = new JTextField();
+		textSuplierCity.setColumns(10);
+		textSuplierCity.setBounds(181, 308, 180, 21);
+		suplierAdd.add(textSuplierCity);
+		
+		JLabel lblNewLabel_2 = new JLabel("Counrty");
+		lblNewLabel_2.setBounds(40, 341, 60, 17);
+		suplierAdd.add(lblNewLabel_2);
+		
+		textSuplierCountry = new JTextField();
+		textSuplierCountry.setColumns(10);
+		textSuplierCountry.setBounds(40, 358, 321, 21);
+		suplierAdd.add(textSuplierCountry);
+		
+		JPanel panel_1_2 = new JPanel();
+		panel_1_2.setBackground(new Color(0, 0, 102));
+		panel_1_2.setBounds(28, 159, 967, 4);
+		suplierAdd.add(panel_1_2);
+		
+		JLabel lblEmailAddress_2 = new JLabel("Email Address");
+		lblEmailAddress_2.setBounds(488, 52, 180, 17);
+		suplierAdd.add(lblEmailAddress_2);
+		
+		textSuplierEmail = new JTextField();
+		textSuplierEmail.setColumns(10);
+		textSuplierEmail.setBounds(488, 70, 347, 21);
+		suplierAdd.add(textSuplierEmail);
+		
+		JLabel lblMobile_2 = new JLabel("Mobile");
+		lblMobile_2.setBounds(488, 103, 60, 17);
+		suplierAdd.add(lblMobile_2);
+		
+		textSuplierPhone = new JTextField();
+		textSuplierPhone.setColumns(10);
+		textSuplierPhone.setBounds(488, 119, 151, 21);
+		suplierAdd.add(textSuplierPhone);
+		
+		JLabel lblOffice_2 = new JLabel("Office");
+		lblOffice_2.setBounds(671, 103, 60, 17);
+		suplierAdd.add(lblOffice_2);
+		
+		textSuplierOffice = new JTextField();
+		textSuplierOffice.setColumns(10);
+		textSuplierOffice.setBounds(671, 119, 164, 21);
+		suplierAdd.add(textSuplierOffice);
+		
+		JButton btnAddSuplier = new JButton("Add Suplier");
+		btnAddSuplier.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				saveSuplier();
+			}
+		});
+		btnAddSuplier.setForeground(Color.WHITE);
+		btnAddSuplier.setBackground(new Color(0, 204, 0));
+		btnAddSuplier.setBounds(40, 429, 143, 27);
+		suplierAdd.add(btnAddSuplier);
+		
+		JButton btnCancelSuplierAdd = new JButton("Cancel");
+		btnCancelSuplierAdd.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				switchPages(supliers);
+			}
+		});
+		btnCancelSuplierAdd.setForeground(Color.WHITE);
+		btnCancelSuplierAdd.setBackground(Color.RED);
+		btnCancelSuplierAdd.setBounds(217, 429, 105, 27);
+		suplierAdd.add(btnCancelSuplierAdd);
+		
 		JButton btnMenue = new JButton();
 		btnMenue.setForeground(new Color(255, 255, 255));
 		btnMenue.setBounds(898, 12, 36, 27);
@@ -700,6 +888,60 @@ public class Dashboard extends JFrame {
 		});
 	}
 	
+	
+	// supplier works
+	public void saveSuplier() {
+		try {
+			String query = "INSERT INTO `supliers`(`first_name`,`last_name`,`address_line1`,`address_line2`,`zip`,`town`,`country`,`email`,`phone`,`office`) "
+					+ "VALUES ('"+this.textSuplierFirstname.getText()+"', '"+this.textSuplierLastname.getText()+"', '"+this.textSuplierAddressline1.getText()+"', '"+this.textSuplierAddressline2.getText()+"', '"+this.textSuplierZip.getText()+"', '"+this.textSuplierCity.getText()+"', '"+this.textSuplierCountry.getText()+"', '"+this.textSuplierEmail.getText()+"', '"+this.textSuplierPhone.getText()+"', '"+this.textSuplierOffice.getText()+"');";
+			// empty fields
+			this.textSuplierFirstname.setText("");
+			this.textSuplierLastname.setText("");
+			this.textSuplierAddressline1.setText("");
+			this.textSuplierAddressline2.setText("");
+			this.textSuplierZip.setText("");
+			this.textSuplierCountry.setText("");
+			this.textSuplierCity.setText("");
+			this.textSuplierEmail.setText("");
+			this.textSuplierPhone.setText("");
+			this.textSuplierOffice.setText("");
+			
+			st.execute(query);
+			st.close();
+			writeSuplierDetails();
+			JOptionPane.showMessageDialog(null, "Supplier details created.");
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeSuplierDetails() {
+		try {
+			String query = "SELECT * FROM supliers";
+			st = con.getConnection().createStatement();
+			ResultSet rs = st.executeQuery(query);
+			
+			this.modelSuplier.setRowCount(0);
+			while (rs.next()) {
+				String name = rs.getString("first_name") + " " + rs.getString("last_name");
+				String city = rs.getString("town");
+				String email = rs.getString("email");
+				String contact = rs.getString("phone");
+				String id = String.valueOf(rs.getInt("id"));
+				
+				String[] tblData = {id, name,city,email,contact};
+				
+				this.modelSuplier.addRow(tblData);
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	// customer works	
 	public void updateCustomer(int id) {
